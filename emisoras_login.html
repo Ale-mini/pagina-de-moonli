@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Moonlight - Login</title>
+  <style>
+    :root{
+      --card: rgba(255,255,255,0.06);
+      --accent: #7be0a6;
+      --muted: rgba(255,255,255,0.65);
+    }
+    html,body{height:100%;margin:0;padding:0;overflow:hidden;}
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: #fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      position:relative;
+      background-color:#000;
+    }
+
+    .moon-bg{
+      position:absolute;
+      top:0;left:0;width:110%;height:110%;
+      background:url('/luna.png') no-repeat center center;
+      background-size:50%;
+      animation: moveMoon 40s ease-in-out infinite alternate;
+      z-index:-1;
+      filter:brightness(0.7);
+    }
+
+    @keyframes moveMoon{
+      0%{transform:translate3d(0,0,0) scale(1.05);}
+      50%{transform:translate3d(-20px,10px,0) scale(1.08);}
+      100%{transform:translate3d(20px,-10px,0) scale(1.05);}
+    }
+
+    .container{
+      width:100%;
+      max-width:900px;
+      display:flex;
+      flex-direction:row;
+      gap:32px;
+      padding:20px;
+      box-sizing:border-box;
+    }
+    .left,.right{flex:1;}
+    .card{
+      background: var(--card);
+      border:1px solid rgba(255,255,255,0.1);
+      padding:24px;
+      border-radius:16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+      backdrop-filter: blur(6px);
+    }
+    h1{margin:0 0 12px;font-size:clamp(26px,5vw,42px)}
+    h2{margin:0 0 8px;font-size:clamp(22px,4vw,32px);color:var(--muted)}
+    h3{margin:0 0 20px;font-size:clamp(16px,3vw,22px);color:var(--muted)}
+    label{font-size:14px;color:var(--muted)}
+    input[type="text"]{
+      width:100%;
+      padding:12px 14px;
+      font-size:16px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:transparent;
+      color:#fff;
+      outline:none;
+      box-sizing:border-box;
+    }
+    input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(123,224,166,0.07);}
+    button{
+      width:100%;
+      padding:12px;
+      border-radius:8px;
+      border:none;
+      background:linear-gradient(90deg,var(--accent),#3ad7a0);
+      color:#012;
+      font-weight:700;
+      cursor:pointer;
+      margin-top:10px;
+    }
+    .hint{font-size:13px;color:rgba(255,255,255,0.6)}
+    .error{color:#ff7b7b;font-size:13px}
+    .success{color:var(--accent);font-weight:700}
+    footer{margin-top:16px;font-size:13px;color:var(--muted);text-align:center;}
+
+    @media (max-width:768px){
+      .container{flex-direction:column;align-items:center;}
+      .left,.right{width:100%;}
+      h1{text-align:center;}
+      h2,h3,p{text-align:center;}
+    }
+  </style>
+</head>
+<body>
+  <div class="moon-bg"></div>
+  <div class="container">
+    <div class="left">
+      <div class="card">
+        <h1>MoonLight</h1>
+        <h2>Agencia de Redes Sociales</h2>
+        <h3>by Samanta</h3>
+        <p class="hint">Página para mantenerte al dia con tus logros y progresos.</p>
+      </div>
+    </div>
+    <div class="right">
+      <div class="card">
+        <h2>Emisoras — Login</h2>
+        <form id="loginForm">
+          <label for="codigo">Código de 6 dígitos</label>
+          <input id="codigo" type="text" maxlength="6" inputmode="numeric" placeholder="123456" />
+          <div id="mensaje" class="hint" style="margin-top:8px">Ingresa un código numérico de exactamente 6 dígitos.</div>
+          <button type="submit">Entrar</button>
+          <footer>Si no tenés código, contactá a la administración.</footer>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const codigo = document.getElementById('codigo').value;
+
+      try {
+        const res = await fetch('http://localhost:5000/validar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ codigo })
+        });
+
+        const data = await res.json();
+        const mensaje = document.getElementById('mensaje');
+        mensaje.textContent = data.msg;
+        mensaje.style.color = data.ok ? 'lightgreen' : 'red';
+
+        if (data.ok && data.redirect) {
+          setTimeout(() => {
+            window.location.href = data.redirect;
+          }, 1000);
+        }
+      } catch(err) {
+        const mensaje = document.getElementById('mensaje');
+        mensaje.textContent = 'Error de conexión al servidor.';
+        mensaje.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
